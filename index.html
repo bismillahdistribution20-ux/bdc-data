@@ -387,6 +387,11 @@ const BN={
 'e.g. Bismillah Store':'যেমন: বিসমিল্লাহ স্টোর','Password (at least 4 characters)':'পাসওয়ার্ড (কমপক্ষে ৪ অক্ষর)','Create account':'অ্যাকাউন্ট খুলুন',
 'Your data stays on this device in this browser. The password only locks the app screen — it is not encryption.':'আপনার ডেটা এই ডিভাইসের এই ব্রাউজারেই থাকে। পাসওয়ার্ড শুধু অ্যাপের স্ক্রিন লক করে, এটি এনক্রিপশন নয়।',
 'Login':'লগইন','Password':'পাসওয়ার্ড','Fill in name, phone and store name':'নাম, ফোন ও দোকানের নাম দিন','Password needs at least 4 characters':'পাসওয়ার্ডে কমপক্ষে ৪ অক্ষর লাগবে','Phone number or password is wrong':'ফোন নম্বর বা পাসওয়ার্ড ভুল',
+'Login with phone & password (any device)':'ফোন ও পাসওয়ার্ড দিয়ে লগইন করুন (যেকোনো ডিভাইস)','Login to your account':'আপনার অ্যাকাউন্টে লগইন করুন','This phone number and the data linked to it will open on this device.':'এই ফোন নম্বরের সাথে যুক্ত ডেটা এই ডিভাইসে চলে আসবে।',
+'No account found with this phone number and password.':'এই ফোন নম্বর ও পাসওয়ার্ড দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি।','This phone number is already used by a cloud account. Use the correct password, or choose a different phone number.':'এই ফোন নম্বর দিয়ে আগে থেকে একটি ক্লাউড অ্যাকাউন্ট আছে। সঠিক পাসওয়ার্ড দিন, অথবা অন্য ফোন নম্বর ব্যবহার করুন।',
+'Logged in':'লগইন হয়েছে','Cloud Login (phone & password)':'ক্লাউড লগইন (ফোন ও পাসওয়ার্ড)','Log in on any device with just your phone number and password — no codes to copy.':'কোনো কোড কপি করা ছাড়াই শুধু ফোন নম্বর ও পাসওয়ার্ড দিয়ে যেকোনো ডিভাইসে লগইন করুন।',
+'Turn on cloud login':'ক্লাউড লগইন চালু করুন','Confirm your password to turn this on':'চালু করতে আপনার পাসওয়ার্ড নিশ্চিত করুন','Turn on':'চালু করুন','Cloud login is on for this phone number':'এই ফোন নম্বরের জন্য ক্লাউড লগইন চালু আছে',
+'Turn off cloud login':'ক্লাউড লগইন বন্ধ করুন','Turn off cloud login? Your data on this phone stays; other devices will stop syncing.':'ক্লাউড লগইন বন্ধ করবেন? এই ফোনের ডেটা থাকবে, অন্য ডিভাইসের সিঙ্ক বন্ধ হয়ে যাবে।',
 'EN':'EN','বাংলা':'বাংলা',
 /* menu + titles */
 'Sales':'বিক্রি','Sales Return':'বিক্রি ফেরত','Payment In':'টাকা গ্রহণ','Purchase':'ক্রয়','Purchase Return':'ক্রয় ফেরত','Payment Out':'টাকা প্রদান',
@@ -798,12 +803,13 @@ function render(){
 const authTop=sub=>'<div class="top"><img src="'+LOGO+'" alt="BDC"><span class="nm">BDC PRO</span><p>'+esc(sub)+'</p></div>';
 function viewSetup(){
  if(S.rs)return viewRestore();
+ if(S.cl)return viewCloudLogin();
  return '<div class="au">'+langBtn()+authTop(tr('Accounts & stock, offline on your phone'))+'<div class="card"><h3>'+tr('Create your account')+'</h3>'
  +'<div class="fg"><label>'+tr('Your name')+'</label><input class="inp" id="sName" autocomplete="name"></div>'
  +'<div class="fg"><label>'+tr('Phone number')+'</label><input class="inp" id="sPhone" type="tel" inputmode="tel"></div>'
  +'<div class="fg"><label>'+tr('Store name')+'</label><input class="inp" id="sStore" placeholder="'+esc(tr('e.g. Bismillah Store'))+'"></div>'
  +'<div class="fg"><label>'+tr('Password (at least 4 characters)')+'</label><input class="inp" id="sPass" type="password" autocomplete="new-password"></div>'
- +'<button class="btn" data-a="setup">'+tr('Create account')+'</button><p class="mut" style="margin-bottom:0">'+tr('Your data stays on this device in this browser. The password only locks the app screen — it is not encryption.')+'</p></div><button class="btn sec" style="margin-top:14px" data-a="rsopen">'+tr('Already have an account? Restore from GitHub')+'</button></div>';
+ +'<button class="btn" data-a="setup">'+tr('Create account')+'</button><p class="mut" style="margin-bottom:0">'+tr('Your data stays on this device in this browser. The password only locks the app screen — it is not encryption.')+'</p></div><button class="btn sec" style="margin-top:14px" data-a="clopen">'+tr('Login with phone & password (any device)')+'</button><button class="btn sec" style="margin-top:8px" data-a="rsopen">'+tr('Already have an account? Restore from GitHub')+'</button></div>';
 }
 function viewLogin(){
  return '<div class="au">'+langBtn()+authTop(storeName())+'<div class="card"><h3>'+tr('Login')+'</h3>'
@@ -818,6 +824,9 @@ ACT.setup=()=>{
  const id=uid();
  meta.user=Object.assign(mkUser(n,ph,pw),{avatar:''});meta.stores=[{id:id,name:st}];meta.cur=id;meta.auth=true;saveMeta();
  db=newDB();S._hc=null;saveDB();S.route='home';S.stack=[];render();
+ supaRegister(ph,pw,n,st,db).then(()=>{
+  meta.sync={mode:'cloud',phone:ph,pw:pw,auto:true};meta.stores[0].syncedAt=Date.now();saveMeta();
+ }).catch(()=>{/* offline or phone already used elsewhere — local account still works, can enable later in Settings */});
 };
 ACT.login=()=>{
  const ph=$('#lPhone').value.trim(),pw=$('#lPass').value;
@@ -1447,7 +1456,7 @@ VIEWS.settings=()=>{
  +'<div class="two"><div class="fg"><label>'+tr('Language')+'</label><select class="inp" id="stLang">'+opt([['bn','বাংলা'],['en','English']],LANG)+'</select></div><div class="fg"><label>'+tr('Appearance')+'</label><select class="inp" id="stTheme">'+opt([['auto',tr('Match my phone')],['light',tr('Light')],['dark',tr('Dark')]],meta.theme)+'</select></div></div></div>'
  +'<div class="card mt"><b>'+tr('Invoice design')+'</b><p class="mut" style="margin:4px 0 0">'+tr('Pick the default design for invoices. You can also switch the design on any invoice.')+'</p>'+designGallery(db.set.inv||'classic')+'</div>'
  +'<div class="sv" style="position:static;padding-bottom:0"><button class="btn mt" data-a="savesettings">'+tr('Save settings')+'</button></div>'
- +cloudCard()+'<div class="card mt"><b>'+tr('Backup')+'</b><p class="mut">'+tr('Copy this text and keep it safe. To restore, paste it here and tap Restore. Restoring replaces this store’s data.')+'</p><textarea class="inp" id="bkT">'+esc(bk)+'</textarea><div class="two mt"><button class="btn sec" data-a="copybk">'+tr('Copy')+'</button><button class="btn sec" data-a="restore">'+tr('Restore')+'</button></div></div>';
+ +cloudCard2()+cloudCard()+'<div class="card mt"><b>'+tr('Backup')+'</b><p class="mut">'+tr('Copy this text and keep it safe. To restore, paste it here and tap Restore. Restoring replaces this store’s data.')+'</p><textarea class="inp" id="bkT">'+esc(bk)+'</textarea><div class="two mt"><button class="btn sec" data-a="copybk">'+tr('Copy')+'</button><button class="btn sec" data-a="restore">'+tr('Restore')+'</button></div></div>';
  return{t:tr('Settings'),h:h};
 };
 ACT.savesettings=()=>{
@@ -1463,6 +1472,9 @@ ACT.savesettings=()=>{
  meta.theme=$('#stTheme').value;meta.lock=$('#stLock').value;applyTheme();
  const nl=$('#stLang').value;meta.lang=nl;LANG=nl;document.documentElement.lang=nl;
  saveMeta();saveDB();render();toast('Settings saved');
+ if(pw&&meta.sync&&meta.sync.mode==='cloud'&&meta.sync.phone===ph){
+  supaChangePw(ph,meta.sync.pw,pw).then(()=>{meta.sync.pw=pw;saveMeta()}).catch(()=>{});
+ }
 };
 ACT.copybk=()=>{const e=$('#bkT');copyText(e.value);try{e.select()}catch(x){}};
 ACT.restore=()=>{
@@ -1578,6 +1590,7 @@ async function syncNow(manual){
 }
 function schedSync(ms){
  if(!meta.sync||!meta.sync.auto||!meta.auth)return;
+ if(meta.sync.mode==='cloud'){clearTimeout(syncT);syncT=setTimeout(()=>cloudSyncNow(false),ms||4000);return}
  const st=curStore();if(!st||!st.cid)return;
  clearTimeout(syncT);syncT=setTimeout(()=>syncNow(false),ms||4000);
 }
@@ -1642,6 +1655,121 @@ ACT.glist=async()=>{
 ACT.glink=d=>ask(tr('Merge the cloud store “{0}” into this store?',d.n),()=>{const st=curStore();st.cid=d.c;saveMeta();syncNow(true).then(()=>{render();if(S.sync.state==='ok')toast('Linked and synced')})},'Link');
 ACT.gunlink=()=>ask('Unlink this store? The cloud copy stays.',()=>{const st=curStore();delete st.cid;delete st.syncedAt;saveMeta();setSync('idle');render()},'Unlink');
 ACT.gdisc=()=>ask('Disconnect from GitHub? Your data on this phone stays.',()=>{meta.sync=null;saveMeta();setSync('idle');render();toast('Disconnected')},'Disconnect');
+
+/* ---------- cloud login (phone + password via Supabase) ---------- */
+const SUPA_URL='https://oogxuzuamhbwswyujqdb.supabase.co';
+const SUPA_KEY='sb_publishable_-WbsG2hDCdaqZomFT7O4BQ_SZxv2-P3';
+async function supaRpc(fn,body){
+ let r;
+ try{r=await fetch(SUPA_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)})}
+ catch(e){throw Object.assign(new Error('offline'),{code:'offline'})}
+ let j=null;try{j=await r.json()}catch(e){}
+ if(!r.ok){
+  const msg=(j&&(j.message||j.hint||j.details))||'';
+  const code=/bad_credentials/.test(msg)?'auth':/phone_taken/.test(msg)?'taken':/weak_password/.test(msg)?'weak':'api';
+  throw Object.assign(new Error(msg||('supabase '+r.status)),{code:code});
+ }
+ return j;
+}
+const supaRegister=(phone,pw,name,store,dbObj)=>supaRpc('bdc_register',{p_phone:phone,p_password:pw,p_name:name,p_store:store,p_data:{db:dbObj}}).then(j=>j&&j[0]&&j[0].id);
+const supaLogin=(phone,pw)=>supaRpc('bdc_login',{p_phone:phone,p_password:pw}).then(j=>j&&j[0]);
+const supaPush=(phone,pw,dbObj)=>supaRpc('bdc_push',{p_phone:phone,p_password:pw,p_data:{db:dbObj}}).then(j=>j&&j[0]);
+const supaPull=(phone,pw)=>supaRpc('bdc_pull',{p_phone:phone,p_password:pw}).then(j=>j&&j[0]);
+const supaChangePw=(phone,oldPw,newPw)=>supaRpc('bdc_change_password',{p_phone:phone,p_old:oldPw,p_new:newPw});
+function cloudErrText(e){
+ if(e&&e.code==='auth')return tr('No account found with this phone number and password.');
+ if(e&&e.code==='taken')return tr('This phone number is already used by a cloud account. Use the correct password, or choose a different phone number.');
+ if(e&&e.code==='weak')return tr('Password needs at least 4 characters');
+ if(e&&e.code==='offline')return tr('You are offline');
+ return (e&&e.message)||'error';
+}
+function viewCloudLogin(){
+ return '<div class="au">'+langBtn()+authTop(tr('Login to your account'))+'<div class="card"><h3>'+tr('Login to your account')+'</h3>'
+ +'<p class="mut" style="margin-top:0">'+tr('This phone number and the data linked to it will open on this device.')+'</p>'
+ +'<div class="fg"><label>'+tr('Phone number')+'</label><input class="inp" id="clPhone" type="tel" inputmode="tel"></div>'
+ +'<div class="fg"><label>'+tr('Password')+'</label><input class="inp" id="clPass" type="password" autocomplete="current-password"></div>'
+ +'<button class="btn" data-a="cllogin">'+tr('Login')+'</button></div><button class="btn sec" style="margin-top:14px" data-a="clclose">'+tr('Back')+'</button></div>';
+}
+ACT.clopen=()=>{S.cl={};render()};
+ACT.clclose=()=>{S.cl=null;render()};
+ACT.cllogin=async()=>{
+ const ph=($('#clPhone').value||'').trim(),pw=$('#clPass').value;
+ if(!ph||!pw)return toast('Fill in name, phone and store name');
+ toast('Loading…');
+ try{
+  const acc=await supaLogin(ph,pw);
+  const id=uid();
+  meta.user=Object.assign(mkUser(acc.name,ph,pw),{avatar:''});
+  meta.stores=[{id:id,name:acc.store_name,syncedAt:Date.now()}];meta.cur=id;
+  meta.sync={mode:'cloud',phone:ph,pw:pw,auto:true};meta.auth=true;meta.lock='stay';meta.lockv=2;
+  saveMeta();
+  db=(acc.data&&acc.data.db)?acc.data.db:newDB();
+  db.set=Object.assign({cur:'Tk',low:5,note:DEFNOTE},db.set);db.del=db.del||{};
+  LS.set('bdcpro_db_'+id,db);S._hc=null;
+  S.cl=null;S.route='home';S.stack=[];render();toast('Logged in');
+ }catch(e){toast(cloudErrText(e))}
+};
+/* ---------- cloud sync engine for phone+password (Supabase) accounts ---------- */
+async function cloudSyncNow(manual){
+ const st=meta.user&&meta.auth?curStore():null,c=meta.sync;
+ if(!c||c.mode!=='cloud'||!st||!db)return;
+ if(!navigator.onLine){setSync('offline');if(manual)toast('You are offline');return}
+ if(syncing){again=true;return}
+ syncing=true;setSync('busy');
+ try{
+  const rem=await supaPull(c.phone,c.pw);
+  const remDb=rem&&rem.data&&rem.data.db;
+  const merged=remDb?mergeDB(db,remDb):db;
+  const changedLocal=merged!==db&&canon(merged)!==canon(db);
+  if(changedLocal)applyDB(merged);
+  if(!remDb||canon(db)!==canon(remDb))await supaPush(c.phone,c.pw,db);
+  st.syncedAt=Date.now();saveMeta();setSync('ok');
+  if(manual)toast('Synced');
+  if(changedLocal&&['home','list','party','detail','due','reports','report','settings'].indexOf(S.route)>=0)render();
+ }catch(e){
+  const m=cloudErrText(e);setSync('err',m);
+  if(manual)toast(tr('Sync failed: {0}',m));
+ }finally{
+  syncing=false;
+  if(again){again=false;schedSync(1500)}
+ }
+}
+function cloudCard2(){
+ const c=meta.sync&&meta.sync.mode==='cloud'?meta.sync:null,st=curStore();
+ let h='<div class="card mt"><b>'+tr('Cloud Login (phone & password)')+'</b>';
+ if(!c){
+  h+='<p class="mut">'+tr('Log in on any device with just your phone number and password — no codes to copy.')+'</p>'
+   +'<div class="fg"><label>'+tr('Confirm your password to turn this on')+'</label><input class="inp" id="clcPass" type="password" autocomplete="current-password"></div>'
+   +'<button class="btn" data-a="clcon">'+tr('Turn on')+'</button>';
+ }else{
+  h+='<p class="mut">'+tr('Cloud login is on for this phone number')+' ('+esc(c.phone)+')</p>'
+   +'<div class="sum"><span id="syStat">'+esc(syncText())+'</span><span id="syLast" style="font-weight:600;font-size:12.5px">'+esc(lastText())+'</span></div>'
+   +'<button class="btn" data-a="clsync">'+tr('Sync now')+'</button>'
+   +'<div class="fg mt"><label>'+tr('Auto sync')+'</label><select class="inp" id="clAuto"><option value="1"'+(c.auto?' selected':'')+'>'+tr('On')+'</option><option value="0"'+(c.auto?'':' selected')+'>'+tr('Off')+'</option></select></div>'
+   +'<button class="btn sec" style="color:var(--red);border-color:var(--red)" data-a="cldisc">'+tr('Turn off cloud login')+'</button>';
+ }
+ return h+'</div>';
+}
+ACT.clcon=async()=>{
+ const pw=$('#clcPass').value;
+ if(!pw||hashPw(pw,meta.user.salt)!==meta.user.ph)return toast('Phone number or password is wrong');
+ toast('Loading…');
+ const st=curStore();
+ try{
+  try{
+   await supaRegister(meta.user.phone,pw,meta.user.name,st.name,db);
+  }catch(e){
+   if(e.code==='taken'){
+    const acc=await supaLogin(meta.user.phone,pw);
+    if(acc&&acc.data&&acc.data.db)applyDB(mergeDB(db,acc.data.db));
+    await supaPush(meta.user.phone,pw,db);
+   }else throw e;
+  }
+  meta.sync={mode:'cloud',phone:meta.user.phone,pw:pw,auto:true};st.syncedAt=Date.now();saveMeta();render();toast('Synced');
+ }catch(e){toast(cloudErrText(e))}
+};
+ACT.clsync=()=>cloudSyncNow(true);
+ACT.cldisc=()=>ask('Turn off cloud login? Your data on this phone stays; other devices will stop syncing.',()=>{meta.sync=null;saveMeta();setSync('idle');render()},'Turn off');
 
 /* ---------- restore an account on a new device from GitHub ---------- */
 function viewRestore(){
@@ -1749,11 +1877,13 @@ document.addEventListener('change',e=>{
  }
  if(S.route==='message'&&(id==='mP'||id==='mT'))msgLinks();
  if(id==='gAuto'&&meta.sync){meta.sync.auto=t.value==='1';saveMeta();if(meta.sync.auto)schedSync(500)}
+ if(id==='clAuto'&&meta.sync){meta.sync.auto=t.value==='1';saveMeta();if(meta.sync.auto)schedSync(500)}
 });
 document.addEventListener('keydown',e=>{
  if(e.key==='Enter'&&!meta.auth&&meta.user&&e.target.id==='lPass')ACT.login();
  if(e.key==='Enter'&&e.target.id==='pq2'){e.preventDefault();addByCode()}
  if(e.key==='Enter'&&e.target.id==='rPass')ACT.rslogin();
+ if(e.key==='Enter'&&e.target.id==='clPass')ACT.cllogin();
 });
 
 /* Install icon: if manifest.json or its icons are missing on the host (e.g. only index.html was uploaded),
