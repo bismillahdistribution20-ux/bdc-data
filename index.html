@@ -2042,5 +2042,6 @@ if(meta.auth)schedSync(1500);
 setTimeout(()=>{const s=$('#splash');if(!s)return;s.style.opacity='0';setTimeout(()=>s.remove(),500)},900);
 })();
 </script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){})})}</script>
 </body>
 </html>
