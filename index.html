@@ -225,6 +225,17 @@ textarea.inp{min-height:110px;resize:vertical}
 #cloudBtn[data-s=busy] .cd{background:#fbbf24}#cloudBtn[data-s=err] .cd{background:#f87171}#cloudBtn[data-s=offline] .cd{background:#9ca3af}
 #cloudBtn[data-s=busy] svg{animation:pls 1s ease-in-out infinite}
 @keyframes pls{50%{opacity:.35}}
+/* barcode camera scan */
+.scanov{position:fixed;inset:0;z-index:400;background:#000;display:flex;flex-direction:column}
+.scanov video{flex:1;width:100%;object-fit:cover;background:#000}
+.scanov .sctop{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:14px;z-index:2}
+.scanov .sctop .ib{background:rgba(0,0,0,.45)}
+.scanov .sccount{color:#fff;font-size:13.5px;font-weight:700;background:rgba(0,0,0,.45);padding:7px 12px;border-radius:20px}
+.scanov .scframe{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:78%;max-width:340px;aspect-ratio:1.5;border:3px solid #fff;border-radius:16px;box-shadow:0 0 0 2000px rgba(0,0,0,.45)}
+.scanov .scline{position:absolute;left:6%;right:6%;top:8%;height:2px;background:#4ade80;box-shadow:0 0 8px #4ade80;animation:scmv 1.8s ease-in-out infinite}
+@keyframes scmv{0%{top:8%}50%{top:90%}100%{top:8%}}
+.scanov .schint{position:absolute;left:0;right:0;bottom:14%;text-align:center;color:#fff;font-size:14px;padding:0 20px}
+.scanov .scmsg{position:absolute;left:16px;right:16px;bottom:8%;color:#fff;padding:12px 14px;border-radius:12px;text-align:center;font-size:13.5px;font-weight:600;opacity:0;transition:opacity .25s}
 .faq ol{margin:8px 0 0;padding-left:20px;color:var(--mut);line-height:1.7}
 /* auth */
 .au{position:relative;flex:1;overflow-y:auto;background:linear-gradient(180deg,var(--pri) 0,var(--pri) 250px,var(--bg) 250px);padding:34px 18px 30px}
@@ -391,7 +402,9 @@ const BN={
 'No account found with this phone number and password.':'এই ফোন নম্বর ও পাসওয়ার্ড দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি।','This phone number is already used by a cloud account. Use the correct password, or choose a different phone number.':'এই ফোন নম্বর দিয়ে আগে থেকে একটি ক্লাউড অ্যাকাউন্ট আছে। সঠিক পাসওয়ার্ড দিন, অথবা অন্য ফোন নম্বর ব্যবহার করুন।',
 'Logged in':'লগইন হয়েছে','Cloud Login (phone & password)':'ক্লাউড লগইন (ফোন ও পাসওয়ার্ড)','Log in on any device with just your phone number and password — no codes to copy.':'কোনো কোড কপি করা ছাড়াই শুধু ফোন নম্বর ও পাসওয়ার্ড দিয়ে যেকোনো ডিভাইসে লগইন করুন।',
 'Turn on cloud login':'ক্লাউড লগইন চালু করুন','Confirm your password to turn this on':'চালু করতে আপনার পাসওয়ার্ড নিশ্চিত করুন','Turn on':'চালু করুন','Cloud login is on for this phone number':'এই ফোন নম্বরের জন্য ক্লাউড লগইন চালু আছে',
-'Turn off cloud login':'ক্লাউড লগইন বন্ধ করুন','Turn off cloud login? Your data on this phone stays; other devices will stop syncing.':'ক্লাউড লগইন বন্ধ করবেন? এই ফোনের ডেটা থাকবে, অন্য ডিভাইসের সিঙ্ক বন্ধ হয়ে যাবে।',
+'Turn off cloud login':'ক্লাউড লগইন বন্ধ করুন','Refresh':'রিফ্রেশ',
+'Scan barcode':'বারকোড স্ক্যান করুন','Point the camera at the barcode':'বারকোডের দিকে ক্যামেরা ধরুন','Camera not available. Make sure you allowed camera access.':'ক্যামেরা পাওয়া যাচ্ছে না। ক্যামেরা অ্যাক্সেসের অনুমতি দিয়েছেন কিনা দেখুন।','This browser cannot scan barcodes. Please update Chrome, or type the barcode / use a barcode scanner device.':'এই ব্রাউজারে বারকোড স্ক্যান করা যাচ্ছে না। Chrome আপডেট করুন, অথবা বারকোড টাইপ করুন বা বারকোড স্ক্যানার যন্ত্র ব্যবহার করুন।','No product found for this barcode':'এই বারকোডের কোনো পণ্য পাওয়া যায়নি',
+'Point the camera at each barcode — it keeps scanning one after another':'একটার পর একটা বারকোডের দিকে ক্যামেরা ধরুন — একটানা স্ক্যান হতে থাকবে','Scanned: {0}':'স্ক্যান হয়েছে: {0}','Added':'যোগ হয়েছে','Turn off cloud login? Your data on this phone stays; other devices will stop syncing.':'ক্লাউড লগইন বন্ধ করবেন? এই ফোনের ডেটা থাকবে, অন্য ডিভাইসের সিঙ্ক বন্ধ হয়ে যাবে।',
 'EN':'EN','বাংলা':'বাংলা',
 /* menu + titles */
 'Sales':'বিক্রি','Sales Return':'বিক্রি ফেরত','Payment In':'টাকা গ্রহণ','Purchase':'ক্রয়','Purchase Return':'ক্রয় ফেরত','Payment Out':'টাকা প্রদান',
@@ -584,7 +597,9 @@ const P={
  close:'<path d="M18 6L6 18M6 6l12 12"/>',
  plus:'<path d="M12 5v14M5 12h14"/>',
  invoice:'<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/>',
- cloud:'<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>'
+ cloud:'<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
+ camera:'<path d="M4 8h3l1.6-2.4A2 2 0 0 1 10.3 4.6h3.4a2 2 0 0 1 1.7 1L17 8h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><circle cx="12" cy="14" r="4"/>',
+ refresh:'<path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M5.5 9a7.5 7.5 0 0 1 12.6-3.2L20 8"/><path d="M18.5 15a7.5 7.5 0 0 1-12.6 3.2L4 16"/>'
 };
 const ic=(n,s=24,st='url(#hg)')=>'<svg class="ic" width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+st+'" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(P[n]||'')+'</svg>';
 
@@ -781,7 +796,7 @@ const VIEWS={},ACT={};
 function header(o){
  const home=S.route==='home';
  return '<div class="hd"><button class="ib" data-a="'+(home?'drawer':'back')+'" aria-label="'+tr(home?'Menu':'Back')+'">'+ic(home?'menu':'back',26,'currentColor')+'</button>'+(home?'<img class="hl" src="'+LOGO+'" alt="">':'')+'<h1>'+esc(o.t)+'</h1>'
- +(home?(meta.sync&&curStore()&&curStore().cid?'<button class="ib" id="cloudBtn" data-s="'+S.sync.state+'" data-a="cloud" aria-label="'+tr('Cloud sync')+'">'+ic('cloud',26,'currentColor')+'<i class="cd"></i></button>':'')+'<button class="ib" data-a="filter" aria-label="'+tr('Filter')+'">'+ic('filter',26,'currentColor')+'</button><button class="ib" data-a="bell" aria-label="'+tr('Notifications')+'">'+ic('bell',26,'currentColor')+(alerts().length?'<i class="dot"></i>':'')+'</button>':(o.hx||''))+'</div>';
+ +(home?(meta.sync&&((curStore()&&curStore().cid)||meta.sync.mode==='cloud')?'<button class="ib" id="cloudBtn" data-s="'+S.sync.state+'" data-a="cloud" aria-label="'+tr('Refresh')+'">'+ic('refresh',26,'currentColor')+'<i class="cd"></i></button>':'')+'<button class="ib" data-a="filter" aria-label="'+tr('Filter')+'">'+ic('filter',26,'currentColor')+'</button><button class="ib" data-a="bell" aria-label="'+tr('Notifications')+'">'+ic('bell',26,'currentColor')+(alerts().length?'<i class="dot"></i>':'')+'</button>':(o.hx||''))+'</div>';
 }
 const CLS={home:'home',list:'lst',invoices:'lst',due:'g2',party:'g2',reports:'g2',tutorial:'g2',form:'form',detail:'narrow',inv:'narrow',settings:'settings',message:'narrow',reset:'narrow',refer:'narrow',help:'narrow',barcode:'narrow',report:''};
 function render(){
@@ -1138,15 +1153,15 @@ VIEWS.inv=()=>{
  const title=tr(S.invEdit?'Edit {0}':'New {0}',tr(I.n));
  if(!pos)return{t:title,h:top+items+tots+save};
  S._st=calc().stock;
- const left='<div class="pos-l"><div class="pbar"><div class="sb">'+ic('search',20,'#8a89a0')+'<input class="inp" id="pq2" placeholder="'+esc(tr('Search name or barcode'))+'" value="'+esc(S.pq)+'" autocomplete="off"></div><button class="chip on" data-a="go" data-r="form" data-k="product">'+tr('+ New Product')+'</button></div><div class="chips" id="pChips">'+catChips()+'</div><div class="pgrid" id="pList">'+prodCards()+'</div></div>';
+ const left='<div class="pos-l"><div class="pbar"><div class="pr"><div class="sb" style="flex:1">'+ic('search',20,'#8a89a0')+'<input class="inp" id="pq2" placeholder="'+esc(tr('Search name or barcode'))+'" value="'+esc(S.pq)+'" autocomplete="off"></div><button class="ib sq" data-a="bcscan" data-f="pq2" aria-label="'+tr('Scan barcode')+'">'+ic('camera',24,'currentColor')+'</button></div><button class="chip on" data-a="go" data-r="form" data-k="product">'+tr('+ New Product')+'</button></div><div class="chips" id="pChips">'+catChips()+'</div><div class="pgrid" id="pList">'+prodCards()+'</div></div>';
  const right='<div class="pos-r">'+top+items+tots+save+'</div>';
  return{t:title,h:'<div class="pos-wrap">'+left+right+'</div>',cls:'pos',wide:1,after:syncBadges};
 };
 ACT.addparty=()=>{S.pre={type:isSaleT(S.inv.type)?'customer':'supplier'};go('form',{k:'party'})};
-ACT.pickitem=()=>{S.pq='';sheet('<h3>'+tr('Select items')+'</h3><input class="inp" id="pq" placeholder="'+tr('Search product')+'" style="margin-bottom:12px"><div id="pl">'+pickHTML()+'</div><button class="btn mt" data-a="closesheet">'+tr('Done')+'</button>')};
+ACT.pickitem=()=>{S.pq='';sheet('<h3>'+tr('Select items')+'</h3><div class="pr" style="margin-bottom:12px"><input class="inp" id="pq" placeholder="'+tr('Search product')+'"><button class="ib sq" data-a="bcscan" data-f="pq" aria-label="'+tr('Scan barcode')+'">'+ic('camera',24,'currentColor')+'</button></div><div id="pl">'+pickHTML()+'</div><button class="btn mt" data-a="closesheet">'+tr('Done')+'</button>')};
 function pickHTML(){
  const q=(S.pq||'').toLowerCase(),st=calc().stock,buy=!isSaleT(S.inv.type);
- const a=db.products.filter(p=>p.name.toLowerCase().indexOf(q)>=0);
+ const a=db.products.filter(p=>p.name.toLowerCase().indexOf(q)>=0||String(p.barcode||'').toLowerCase().indexOf(q)>=0);
  return a.map(p=>{const it=S.inv.items.find(i=>i.pid===p.id);return '<div class="row" data-a="pick" data-id="'+p.id+'"><div class="rm"><b>'+esc(p.name)+'</b><small>'+tr('Stock {0} {1}',fmt(st[p.id]),esc(nameOf(db.units,p.unit)))+'</small></div><div class="rr"><b>'+cur(buy?p.buy:p.sell)+'</b>'+(it?'<small class="g">'+tr('× {0} added',fmt(it.qty))+'</small>':'')+'</div></div>'}).join('')||'<p class="em">'+tr('No products found. Add products from the Product menu first.')+'</p>';
 }
 ACT.pick=d=>{
@@ -1169,6 +1184,117 @@ function addByCode(){
  if(!a.length)a=db.products.filter(p=>p.name.toLowerCase().indexOf(q)>=0&&(!S.pcat||p.cat===S.pcat));
  if(a.length===1){ACT.pick({id:a[0].id});S.pq='';const e=$('#pq2');if(e)e.value='';$('#pList').innerHTML=prodCards();syncBadges()}
 }
+function addByCodeSheet(){
+ const q=(S.pq||'').trim().toLowerCase();if(!q)return;
+ let a=db.products.filter(p=>String(p.barcode||'').toLowerCase()===q);
+ if(!a.length)a=db.products.filter(p=>p.name.toLowerCase().indexOf(q)>=0);
+ if(a.length===1){ACT.pick({id:a[0].id});S.pq='';const e=$('#pq');if(e)e.value='';const pl=$('#pl');if(pl)pl.innerHTML=pickHTML()}
+}
+/* ---------- camera barcode scan (mobile) ---------- */
+let scanStream=null;
+function beep(ok){
+ try{
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  o.type='sine';o.frequency.value=ok?1400:420;
+  g.gain.setValueAtTime(0.001,ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.3,ctx.currentTime+0.01);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+(ok?0.14:0.22));
+  o.connect(g);g.connect(ctx.destination);
+  o.start();o.stop(ctx.currentTime+(ok?0.16:0.24));
+  o.onended=()=>ctx.close();
+ }catch(e){}
+}
+function qtySum(){return (S.inv&&S.inv.items?S.inv.items:[]).reduce((s,i)=>s+num(i.qty),0)}
+function scanFlash(ok,text){
+ const ov=$('#scanOv');if(!ov)return;
+ let m=ov.querySelector('.scmsg');
+ if(!m){m=document.createElement('div');m.className='scmsg';ov.appendChild(m)}
+ m.style.background=ok?'rgba(22,163,74,.9)':'rgba(220,38,38,.9)';
+ m.textContent=text;
+ m.style.opacity='1';
+ clearTimeout(m._t);
+ m._t=setTimeout(()=>{m.style.opacity='0'},900);
+ const cnt=ov.querySelector('.sccount');
+ if(cnt)cnt.textContent=tr('Scanned: {0}',qtySum());
+}
+async function openScan(field){
+ const old=$('#scanOv');if(old)old.remove();
+ if(!('BarcodeDetector' in window)){toast('This browser cannot scan barcodes. Please update Chrome, or type the barcode / use a barcode scanner device.');return}
+ let formats=['ean_13','ean_8','upc_a','upc_e','code_128','code_39','itf','qr_code'];
+ try{
+  if(window.BarcodeDetector.getSupportedFormats){
+   const sup=await window.BarcodeDetector.getSupportedFormats();
+   const f2=formats.filter(f=>sup.indexOf(f)>=0);
+   formats=f2.length?f2:sup;
+  }
+ }catch(e){}
+ let detector;
+ try{detector=new window.BarcodeDetector({formats:formats})}
+ catch(e){try{detector=new window.BarcodeDetector()}catch(e2){toast('This browser cannot scan barcodes. Please update Chrome, or type the barcode / use a barcode scanner device.');return}}
+ const ov=document.createElement('div');ov.className='scanov';ov.id='scanOv';
+ ov.innerHTML='<div class="sctop"><span class="sccount">'+tr('Scanned: {0}',qtySum())+'</span><button class="ib" id="scClose" aria-label="'+tr('Done')+'">'+ic('close',26,'#fff')+'</button></div>'
+  +'<video id="scVid" playsinline autoplay muted></video><div class="scframe"><div class="scline"></div></div>'
+  +'<div class="schint">'+tr('Point the camera at each barcode — it keeps scanning one after another')+'</div>';
+ document.body.appendChild(ov);
+ let stopped=false,started=false;
+ function closeScan(){
+  stopped=true;
+  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null}
+  const el=$('#scanOv');if(el)el.remove();
+ }
+ $('#scClose').onclick=closeScan;
+ const video=$('#scVid');
+ let stream;
+ try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false})}
+ catch(e){
+  const h=ov.querySelector('.schint');if(h)h.textContent=tr('Camera not available. Make sure you allowed camera access.');
+  return;
+ }
+ if(stopped){stream.getTracks().forEach(t=>t.stop());return}
+ scanStream=stream;video.srcObject=stream;
+ let lastCode='',lastTime=0;
+ const loop=async()=>{
+  if(stopped)return;
+  try{
+   const codes=await detector.detect(video);
+   if(codes&&codes.length){
+    const val=(codes[0].rawValue||'').trim();
+    const now=Date.now();
+    if(val&&(val!==lastCode||now-lastTime>1400)){
+     lastCode=val;lastTime=now;
+     onScanned(field,val);
+    }
+   }
+  }catch(e){}
+  requestAnimationFrame(loop);
+ };
+ const start=()=>{if(started)return;started=true;loop()};
+ video.addEventListener('loadedmetadata',start);
+ setTimeout(()=>{if(video.readyState>=2)start()},500);
+}
+function onScanned(field,code){
+ if(!code)return;
+ S.pq=code;
+ const p=db.products.find(z=>String(z.barcode||'').toLowerCase()===code.toLowerCase());
+ if(field==='pq2'){
+  const before=qtySum();
+  addByCode();
+  const ok=qtySum()>before;
+  const e=$('#pq2');if(e)e.value='';S.pq='';
+  const pl=$('#pList');if(pl)pl.innerHTML=prodCards();
+  syncBadges();
+  beep(ok);scanFlash(ok,ok?(p?p.name:tr('Added')):tr('No product found for this barcode'));
+ }else{
+  const before=qtySum();
+  addByCodeSheet();
+  const ok=qtySum()>before;
+  const e=$('#pq');if(e)e.value='';S.pq='';
+  const pl=$('#pl');if(pl)pl.innerHTML=pickHTML();
+  beep(ok);scanFlash(ok,ok?(p?p.name:tr('Added')):tr('No product found for this barcode'));
+ }
+}
+ACT.bcscan=d=>openScan(d.f||'pq2');
 
 ACT.rmitem=d=>{S.inv.items.splice(+d.i,1);refreshItems()};
 ACT.saveinv=()=>{
@@ -1636,7 +1762,7 @@ ACT.gconnect=async()=>{
  }catch(e){meta.sync=prev||null;toast(errText(e))}
 };
 ACT.gsync=()=>syncNow(true);
-ACT.cloud=()=>syncNow(true);
+ACT.cloud=()=>{if(meta.sync&&meta.sync.mode==='cloud')return cloudSyncNow(true);return syncNow(true)};
 ACT.gupload=()=>{const st=curStore();st.cid=uid();saveMeta();syncNow(true).then(()=>{render();if(S.sync.state==='ok')toast('Uploaded to the cloud')})};
 ACT.glist=async()=>{
  sheet('<h3>'+tr('Stores in the cloud')+'</h3><p class="em">'+tr('Loading…')+'</p>');
@@ -1882,6 +2008,7 @@ document.addEventListener('change',e=>{
 document.addEventListener('keydown',e=>{
  if(e.key==='Enter'&&!meta.auth&&meta.user&&e.target.id==='lPass')ACT.login();
  if(e.key==='Enter'&&e.target.id==='pq2'){e.preventDefault();addByCode()}
+ if(e.key==='Enter'&&e.target.id==='pq'){e.preventDefault();addByCodeSheet()}
  if(e.key==='Enter'&&e.target.id==='rPass')ACT.rslogin();
  if(e.key==='Enter'&&e.target.id==='clPass')ACT.cllogin();
 });
