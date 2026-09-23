@@ -844,7 +844,7 @@ ACT.setup=()=>{
  const id=uid();
  meta.user=Object.assign(mkUser(n,ph,pw),{avatar:''});meta.stores=[{id:id,name:st}];meta.cur=id;meta.auth=true;saveMeta();
  db=newDB();S._hc=null;saveDB();S.route='home';S.stack=[];render();
- supaRegister(ph,pw,n,st,db).then(()=>{
+ supaRegister(ph,pw,n,st,{[id]:{name:st,db:db}}).then(()=>{
   meta.sync={mode:'cloud',phone:ph,pw:pw,auto:true};meta.stores[0].syncedAt=Date.now();saveMeta();
  }).catch(()=>{/* offline or phone already used elsewhere — local account still works, can enable later in Settings */});
 };
@@ -1851,10 +1851,21 @@ async function supaRpc(fn,body){
  }
  return j;
 }
-const supaRegister=(phone,pw,name,store,dbObj)=>supaRpc('bdc_register',{p_phone:phone,p_password:pw,p_name:name,p_store:store,p_data:{db:dbObj}}).then(j=>j&&j[0]&&j[0].id);
+const supaRegister=(phone,pw,name,store,storesObj)=>supaRpc('bdc_register',{p_phone:phone,p_password:pw,p_name:name,p_store:store,p_data:{stores:storesObj}}).then(j=>j&&j[0]&&j[0].id);
 const supaLogin=(phone,pw)=>supaRpc('bdc_login',{p_phone:phone,p_password:pw}).then(j=>j&&j[0]);
-const supaPush=(phone,pw,dbObj)=>supaRpc('bdc_push',{p_phone:phone,p_password:pw,p_data:{db:dbObj}}).then(j=>j&&j[0]);
+const supaPush=(phone,pw,storesObj)=>supaRpc('bdc_push',{p_phone:phone,p_password:pw,p_data:{stores:storesObj}}).then(j=>j&&j[0]);
 const supaPull=(phone,pw)=>supaRpc('bdc_pull',{p_phone:phone,p_password:pw}).then(j=>j&&j[0]);
+/* returns {storeId:{name,db}} from an account payload; falls back to the old single-store shape (v1.7) so existing cloud accounts keep working, mapping the legacy blob onto fallbackId */
+function remoteStoresOf(acc,fallbackId){
+ if(acc&&acc.data&&acc.data.stores)return acc.data.stores;
+ if(acc&&acc.data&&acc.data.db){const o={};o[fallbackId||uid()]={name:(acc.store_name||'Store'),db:acc.data.db};return o}
+ return {};
+}
+function allStoresPayload(){
+ const o={};
+ meta.stores.forEach(s=>{o[s.id]={name:s.name,db:(s.id===meta.cur?db:(LS.get('bdcpro_db_'+s.id)||newDB()))}});
+ return o;
+}
 const supaChangePw=(phone,oldPw,newPw)=>supaRpc('bdc_change_password',{p_phone:phone,p_old:oldPw,p_new:newPw});
 function cloudErrText(e){
  if(e&&e.code==='auth')return tr('No account found with this phone number and password.');
@@ -1878,14 +1889,21 @@ ACT.cllogin=async()=>{
  toast('Loading…');
  try{
   const acc=await supaLogin(ph,pw);
-  const id=uid();
+  const remote=remoteStoresOf(acc);
+  const ids=Object.keys(remote);
   meta.user=Object.assign(mkUser(acc.name,ph,pw),{avatar:''});
-  meta.stores=[{id:id,name:acc.store_name,syncedAt:Date.now()}];meta.cur=id;
+  if(ids.length){
+   meta.stores=ids.map(sid=>({id:sid,name:remote[sid].name||'Store',syncedAt:Date.now()}));
+   meta.cur=ids[0];
+   ids.forEach(sid=>{const d=remote[sid].db||newDB();d.set=Object.assign({cur:'Tk',low:5,note:DEFNOTE},d.set);d.del=d.del||{};LS.set('bdcpro_db_'+sid,d)});
+   db=LS.get('bdcpro_db_'+meta.cur);
+  }else{
+   const id=uid();
+   meta.stores=[{id:id,name:acc.store_name||'Store',syncedAt:Date.now()}];meta.cur=id;
+   db=newDB();LS.set('bdcpro_db_'+id,db);
+  }
   meta.sync={mode:'cloud',phone:ph,pw:pw,auto:true};meta.auth=true;meta.lock='stay';meta.lockv=2;
-  saveMeta();
-  db=(acc.data&&acc.data.db)?acc.data.db:newDB();
-  db.set=Object.assign({cur:'Tk',low:5,note:DEFNOTE},db.set);db.del=db.del||{};
-  LS.set('bdcpro_db_'+id,db);S._hc=null;
+  saveMeta();S._hc=null;
   S.cl=null;S.route='home';S.stack=[];render();toast('Logged in');
  }catch(e){toast(cloudErrText(e))}
 };
@@ -1898,11 +1916,17 @@ async function cloudSyncNow(manual){
  syncing=true;setSync('busy');
  try{
   const rem=await supaPull(c.phone,c.pw);
-  const remDb=rem&&rem.data&&rem.data.db;
+  const remStores=remoteStoresOf(rem,st.id);
+  const remEntry=remStores[st.id];
+  const remDb=remEntry&&remEntry.db;
   const merged=remDb?mergeDB(db,remDb):db;
   const changedLocal=merged!==db&&canon(merged)!==canon(db);
   if(changedLocal)applyDB(merged);
-  if(!remDb||canon(db)!==canon(remDb))await supaPush(c.phone,c.pw,db);
+  if(!remDb||canon(db)!==canon(remDb)){
+   const out=Object.assign({},remStores);
+   out[st.id]={name:st.name,db:db};
+   await supaPush(c.phone,c.pw,out);
+  }
   st.syncedAt=Date.now();saveMeta();setSync('ok');
   if(manual)toast('Synced');
   if(changedLocal&&['home','list','party','detail','due','reports','report','settings'].indexOf(S.route)>=0)render();
@@ -1936,13 +1960,22 @@ ACT.clcon=async()=>{
  toast('Loading…');
  const st=curStore();
  try{
+  const mine=allStoresPayload();
   try{
-   await supaRegister(meta.user.phone,pw,meta.user.name,st.name,db);
+   await supaRegister(meta.user.phone,pw,meta.user.name,st.name,mine);
   }catch(e){
    if(e.code==='taken'){
     const acc=await supaLogin(meta.user.phone,pw);
-    if(acc&&acc.data&&acc.data.db)applyDB(mergeDB(db,acc.data.db));
-    await supaPush(meta.user.phone,pw,db);
+    const remote=remoteStoresOf(acc,meta.cur);
+    const out=Object.assign({},remote);
+    Object.keys(mine).forEach(id=>{out[id]=remote[id]?{name:mine[id].name,db:mergeDB(mine[id].db,remote[id].db)}:mine[id]});
+    Object.keys(out).forEach(id=>{
+     if(!meta.stores.some(s=>s.id===id))meta.stores.push({id:id,name:out[id].name});
+     LS.set('bdcpro_db_'+id,out[id].db);
+     if(id===meta.cur){db=out[id].db;S._hc=null}
+    });
+    saveMeta();
+    await supaPush(meta.user.phone,pw,out);
    }else throw e;
   }
   meta.sync={mode:'cloud',phone:meta.user.phone,pw:pw,auto:true};st.syncedAt=Date.now();saveMeta();render();toast('Synced');
