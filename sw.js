@@ -1,4 +1,4 @@
-const CACHE='bdcpro-v2';
+const CACHE='bdcpro-v5';
 const ASSETS=['./','./index.html','./manifest.json','./bdc.ico','./icons/icon-192.png','./icons/icon-512.png','./icons/logo.png','./icons/apple-touch-icon.png','./icons/favicon.png'];
 
 self.addEventListener('install',e=>{

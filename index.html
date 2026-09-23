@@ -603,7 +603,8 @@ const P={
  cloud:'<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
  camera:'<path d="M4 8h3l1.6-2.4A2 2 0 0 1 10.3 4.6h3.4a2 2 0 0 1 1.7 1L17 8h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><circle cx="12" cy="14" r="4"/>',
  home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4h4v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/>',
- refresh:'<path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M5.5 9a7.5 7.5 0 0 1 12.6-3.2L20 8"/><path d="M18.5 15a7.5 7.5 0 0 1-12.6 3.2L4 16"/>'
+ refresh:'<path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M5.5 9a7.5 7.5 0 0 1 12.6-3.2L20 8"/><path d="M18.5 15a7.5 7.5 0 0 1-12.6 3.2L4 16"/>',
+ gift:'<rect x="3" y="8" width="18" height="13" rx="1"/><path d="M3 12h18"/><path d="M12 8v13"/><path d="M12 8C10 4 5 4.5 5 7s3.5 1.5 7 1zM12 8c2-4 7-3.5 7-1s-3.5 1.5-7 1z"/>'
 };
 const ic=(n,s=24,st='url(#hg)')=>'<svg class="ic" width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+st+'" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(P[n]||'')+'</svg>';
 
@@ -640,7 +641,8 @@ const INV={
  purchase:{t:'Purchase',n:'Purchase',p:'P',paid:'Paid',pl:'Paid Amount'},
  purchase_return:{t:'Purchase Return',n:'Purchase Return',p:'PR',paid:'Received Back',pl:'Received Back Amount'},
  sale_order:{t:'Sales Order',n:'Sales Order',p:'SO',order:1},
- purchase_order:{t:'Purchase Order',n:'Purchase Order',p:'PO',order:1}
+ purchase_order:{t:'Purchase Order',n:'Purchase Order',p:'PO',order:1},
+ sale_free:{t:'Free Items',n:'Free Item',p:'FR',paid:'Given Amount',pl:'Given Amount'}
 };
 const isSaleT=t=>t.indexOf('sale')===0;
 const TITLES={pay_in:'Payment In',pay_out:'Payment Out',expense:'Expenses',bank_tx:'Bank Transactions',stock_adj:'Stock Adjustment',cash_adj:'Cash Adjustment',parties:'Party',products:'Products',cats:'Categories',units:'Unit',expcats:'Expense Categories',banks:'Banks'};
@@ -687,7 +689,7 @@ function calc(asOn){
   for(const f of flowsOf(t)){if(f[0]!=='cash'&&f[0] in c.bank)c.bank[f[0]]+=f[1];else c.cash+=f[1]}
   if(t.party in c.party)c.party[t.party]+=pd(t);
   let sg=0;
-  if(t.type==='sale'||t.type==='purchase_return')sg=-1;
+  if(t.type==='sale'||t.type==='purchase_return'||t.type==='sale_free')sg=-1;
   else if(t.type==='sale_return'||t.type==='purchase')sg=1;
   if(sg&&t.items)for(const i of t.items)if(i.pid in c.stock)c.stock[i.pid]+=sg*num(i.qty);
   if(t.type==='stock_adj'&&t.pid in c.stock)c.stock[t.pid]+=(t.dir==='add'?1:-1)*num(t.qty);
@@ -705,7 +707,7 @@ function rng(p){
 const PL={today:'Today',week:'Last 7 Days',month:'This Month',year:'This Year',all:'All Time'};
 const PLA={today:"Today's",week:'7-day',month:"This month's",year:"This year's",all:'All-time'};
 function metrics(f,t){
- const m={sale:0,sret:0,pur:0,pret:0,cogs:0,exp:0};
+ const m={sale:0,sret:0,pur:0,pret:0,cogs:0,exp:0,free:0};
  for(const x of db.tx){
   if(x.date<f||x.date>t)continue;
   if(x.type==='sale'){m.sale+=x.total;m.cogs+=cost(x)}
@@ -713,8 +715,9 @@ function metrics(f,t){
   else if(x.type==='purchase')m.pur+=x.total;
   else if(x.type==='purchase_return')m.pret+=x.total;
   else if(x.type==='expense')m.exp+=num(x.amount);
+  else if(x.type==='sale_free')m.free+=cost(x);
  }
- m.net=m.sale-m.sret;m.gp=m.net-m.cogs;m.np=m.gp-m.exp;
+ m.net=m.sale-m.sret;m.gp=m.net-m.cogs;m.np=m.gp-m.exp-m.free;
  return m;
 }
 const thr=p=>num(p.low)>0?num(p.low):num(db.set.low);
@@ -749,7 +752,7 @@ const langBtn=()=>'<button class="lgb" data-a="lang" aria-label="Language">'+(LA
 /* ---------- menu / drawer ---------- */
 const MENU=[
  {i:'home',t:'Dashboard',a:'gohome'},
- {g:'sales',i:'sales',t:'Sales',c:[['Sales','sale',1],['Sales Return','sale_return',1],['Payment In','pay_in',1]]},
+ {g:'sales',i:'sales',t:'Sales',c:[['Sales','sale',1],['Sales Return','sale_return',1],['Free Item','sale_free',1],['Payment In','pay_in',1]]},
  {g:'purchase',i:'purchase',t:'Purchase',c:[['Purchase','purchase',1],['Purchase Return','purchase_return',1],['Payment Out','pay_out',1]]},
  {i:'invoice',t:'Invoices',r:'invoices',k:'invoices',add:1},
  {i:'sorder',t:'Sales Order',k:'sale_order',add:1},
@@ -963,9 +966,9 @@ function txSearch(x){return(pname(x.party)+' '+(x.no||'')+' '+(x.note||'')+' '+(
 function txRow(x){
  const d=fd(x.date);
  if(INV[x.type]){
-  const I=INV[x.type],due=num(x.total)-num(x.paid);
-  const st=I.order?'<small class="'+(x.status==='done'?'g':'o')+'">'+tr(x.status==='done'?'Completed':'Pending')+'</small>':(due>0.004?'<small class="r">'+tr('Due {0}',cur(due))+'</small>':'<small class="g">'+tr('Paid')+'</small>');
-  return '<div class="row" data-a="go" data-r="detail" data-id="'+x.id+'"><div class="av">'+esc((pname(x.party)[0]||'W').toUpperCase())+'</div><div class="rm"><b>'+esc(pname(x.party))+'</b><small>'+x.no+' · '+d+'</small></div><div class="rr"><b>'+cur(x.total)+'</b>'+st+'</div></div>';
+  const I=INV[x.type],due=num(x.total)-num(x.paid),free=x.type==='sale_free';
+  const st=I.order?'<small class="'+(x.status==='done'?'g':'o')+'">'+tr(x.status==='done'?'Completed':'Pending')+'</small>':free?'<small class="g">'+tr('Free')+'</small>':(due>0.004?'<small class="r">'+tr('Due {0}',cur(due))+'</small>':'<small class="g">'+tr('Paid')+'</small>');
+  return '<div class="row" data-a="go" data-r="detail" data-id="'+x.id+'"><div class="av">'+esc((pname(x.party)[0]||'W').toUpperCase())+'</div><div class="rm"><b>'+esc(pname(x.party))+'</b><small>'+x.no+' · '+d+'</small></div><div class="rr"><b>'+cur(free?cost(x):x.total)+'</b>'+st+'</div></div>';
  }
  let title=ttl(x.type),sub=d,amt='',col='',kind=x.type;
  const acctName=id=>(!id||id==='cash')?tr('Cash'):(nameOf(db.banks,id)||tr('Bank'));
@@ -1010,11 +1013,11 @@ function listBody(k){
  if(k==='products')return prodBody(q);
  if(isTx(k)){
   const r=rng(S.lf);
-  let a=db.tx.filter(x=>x.type===k&&x.date>=r[0]&&x.date<=r[1]);
+  let a=db.tx.filter(x=>(x.type===k||(k==='sale'&&x.type==='sale_free'))&&x.date>=r[0]&&x.date<=r[1]);
   if(q)a=a.filter(x=>txSearch(x).indexOf(q)>=0);
   a.sort((x,y)=>y.date.localeCompare(x.date)||(y.ts||0)-(x.ts||0));
   let tot='';
-  if(k!=='stock_adj'){const s=a.reduce((z,x)=>z+num(INV[k]?x.total:x.amount),0);tot='<div class="sum"><span>'+tr(a.length===1?'{0} record':'{0} records',fmt(a.length))+'</span><span>'+cur(s)+'</span></div>'}
+  if(k!=='stock_adj'){const s=a.reduce((z,x)=>z+(x.type==='sale_free'?cost(x):(INV[k]?x.total:x.amount)),0);tot='<div class="sum"><span>'+tr(a.length===1?'{0} record':'{0} records',fmt(a.length))+'</span><span>'+cur(s)+'</span></div>'}
   return tot+(a.length?a.map(txRow).join(''):emptyList());
  }
  let a=db[COLL[k]].slice();
@@ -1033,11 +1036,11 @@ VIEWS.list=p=>{
 ACT.lf=d=>{S.lf=d.p;render()};
 
 /* ---------- all invoices (view old ones, edit mistakes) ---------- */
-const IVT=[['','All types'],['sale','Sale'],['purchase','Purchase'],['sale_return','Sales Return'],['purchase_return','Purchase Return'],['sale_order','Sales Order'],['purchase_order','Purchase Order']];
+const IVT=[['','All types'],['sale','Sale'],['purchase','Purchase'],['sale_return','Sales Return'],['purchase_return','Purchase Return'],['sale_order','Sales Order'],['purchase_order','Purchase Order'],['sale_free','Free Item']];
 function invRow(x){
- const I=INV[x.type],due=num(x.total)-num(x.paid);
- const st=I.order?'<small class="'+(x.status==='done'?'g':'o')+'">'+tr(x.status==='done'?'Completed':'Pending')+'</small>':(due>0.004?'<small class="r">'+tr('Due {0}',cur(due))+'</small>':'<small class="g">'+tr('Paid')+'</small>');
- return '<div class="row" data-a="go" data-r="detail" data-id="'+x.id+'"><div class="av">'+esc((pname(x.party)[0]||'W').toUpperCase())+'</div><div class="rm"><b>'+esc(pname(x.party))+'</b><small>'+tr(I.n)+' · '+x.no+' · '+fd(x.date)+'</small></div><div class="rr"><b>'+cur(x.total)+'</b>'+st+'</div><button class="ib" data-a="editinv" data-id="'+x.id+'" aria-label="'+tr('Edit')+'">'+ic('pencil',20,'#7561ff')+'</button></div>';
+ const I=INV[x.type],due=num(x.total)-num(x.paid),free=x.type==='sale_free';
+ const st=I.order?'<small class="'+(x.status==='done'?'g':'o')+'">'+tr(x.status==='done'?'Completed':'Pending')+'</small>':free?'<small class="g">'+tr('Free')+'</small>':(due>0.004?'<small class="r">'+tr('Due {0}',cur(due))+'</small>':'<small class="g">'+tr('Paid')+'</small>');
+ return '<div class="row" data-a="go" data-r="detail" data-id="'+x.id+'"><div class="av">'+esc((pname(x.party)[0]||'W').toUpperCase())+'</div><div class="rm"><b>'+esc(pname(x.party))+'</b><small>'+tr(I.n)+' · '+x.no+' · '+fd(x.date)+'</small></div><div class="rr"><b>'+cur(free?cost(x):x.total)+'</b>'+st+'</div><button class="ib" data-a="editinv" data-id="'+x.id+'" aria-label="'+tr('Edit')+'">'+ic('pencil',20,'#7561ff')+'</button></div>';
 }
 function invListBody(){
  const q=S.q.trim().toLowerCase(),r=rng(S.lf);
@@ -1157,12 +1160,12 @@ function startInv(k,base,editId,from){
 }
 const subT=()=>S.inv.items.reduce((s,i)=>s+num(i.qty)*num(i.price),0);
 const totT=()=>Math.max(0,subT()-num(S.inv.disc));
-const POS=['sale','purchase','sale_order','purchase_order'];
+const POS=['sale','purchase','sale_order','purchase_order','sale_free'];
 const isPos=t=>POS.indexOf(t)>=0;
 function itemsHTML(){
- const a=S.inv.items,pos=isPos(S.inv.type);
+ const a=S.inv.items,pos=isPos(S.inv.type),free=S.inv.type==='sale_free';
  if(!a.length)return '<p class="em">'+(pos?tr('Tap products on the left to add them.'):tr('No items yet. Tap {0}.','<b>'+tr('+ Add Item')+'</b>'))+'</p>';
- if(pos)return a.map((it,i)=>'<div class="li"><div class="lh"><b>'+esc(it.name)+'</b><button class="ib" data-a="rmitem" data-i="'+i+'" aria-label="'+tr('Remove')+'">'+ic('close',18,'currentColor')+'</button></div><div class="qs"><button class="qb" data-a="qadj" data-i="'+i+'" data-d="-1" aria-label="-">−</button><input class="inp sm" type="number" inputmode="decimal" data-li="'+i+'" data-f="qty" value="'+it.qty+'" aria-label="'+tr('Qty')+'"><button class="qb" data-a="qadj" data-i="'+i+'" data-d="1" aria-label="+">+</button></div><div class="pp"><div><label>'+tr('Price')+'</label><input class="inp sm" type="number" inputmode="decimal" data-li="'+i+'" data-f="price" value="'+it.price+'"></div><div class="lt"><label>'+tr('Total')+'</label><b id="lt'+i+'">'+fmt(num(it.qty)*num(it.price))+'</b></div></div></div>').join('');
+ if(pos)return a.map((it,i)=>'<div class="li"><div class="lh"><b>'+esc(it.name)+'</b><button class="ib" data-a="rmitem" data-i="'+i+'" aria-label="'+tr('Remove')+'">'+ic('close',18,'currentColor')+'</button></div><div class="qs"><button class="qb" data-a="qadj" data-i="'+i+'" data-d="-1" aria-label="-">−</button><input class="inp sm" type="number" inputmode="decimal" data-li="'+i+'" data-f="qty" value="'+it.qty+'" aria-label="'+tr('Qty')+'"><button class="qb" data-a="qadj" data-i="'+i+'" data-d="1" aria-label="+">+</button></div><div class="pp">'+(free?'<div><label>'+tr('Price')+'</label><input class="inp sm" disabled value="0"></div>':'<div><label>'+tr('Price')+'</label><input class="inp sm" type="number" inputmode="decimal" data-li="'+i+'" data-f="price" value="'+it.price+'"></div>')+'<div class="lt"><label>'+tr('Total')+'</label><b id="lt'+i+'">'+fmt(num(it.qty)*num(it.price))+'</b></div></div></div>').join('');
  return a.map((it,i)=>'<div class="li"><div class="lh"><b>'+esc(it.name)+'</b><button class="ib" data-a="rmitem" data-i="'+i+'" aria-label="'+tr('Remove')+'">'+ic('close',20,'currentColor')+'</button></div><div class="lg"><div><label>'+tr('Qty')+'</label><input class="inp sm" type="number" inputmode="decimal" data-li="'+i+'" data-f="qty" value="'+it.qty+'"></div><div><label>'+tr('Price')+'</label><input class="inp sm" type="number" inputmode="decimal" data-li="'+i+'" data-f="price" value="'+it.price+'"></div><div class="lt"><label>'+tr('Total')+'</label><b id="lt'+i+'">'+fmt(num(it.qty)*num(it.price))+'</b></div></div></div>').join('');
 }
 function syncBadges(){
@@ -1201,7 +1204,7 @@ VIEWS.inv=()=>{
  const items='<div class="card mt"><div class="sh2"><b>'+tr('Items')+'</b>'+(pos?'':'<button class="chip on" data-a="pickitem">'+tr('+ Add Item')+'</button>')+'</div><div id="iItems">'+itemsHTML()+'</div></div>';
  const tots='<div class="card mt"><div class="fg"><label>'+tr('Discount')+'</label><input class="inp" id="iDisc" type="number" inputmode="decimal" value="'+(num(x.disc)||'')+'"></div>'
  +'<div class="sr"><span>'+tr('Subtotal')+'</span><b id="sSub">'+cur(subT())+'</b></div><div class="sr big"><span>'+tr('Total')+'</span><b id="sTot">'+cur(t)+'</b></div>'
- +(I.order?'':'<div class="fg mt"><label>'+tr(I.pl)+'</label><input class="inp" id="iPaid" type="number" inputmode="decimal" value="'+(num(x.paid)||'')+'"></div><div class="fg"><label>'+tr('Payment Account')+'</label><select class="inp" id="iMode">'+mo+'</select></div><div class="sr"><span>'+tr('Due')+'</span><b id="sDue" class="r">'+cur(Math.max(0,t-num(x.paid)))+'</b></div>')
+ +(I.order||x.type==='sale_free'?'':'<div class="fg mt"><label>'+tr(I.pl)+'</label><input class="inp" id="iPaid" type="number" inputmode="decimal" value="'+(num(x.paid)||'')+'"></div><div class="fg"><label>'+tr('Payment Account')+'</label><select class="inp" id="iMode">'+mo+'</select></div><div class="sr"><span>'+tr('Due')+'</span><b id="sDue" class="r">'+cur(Math.max(0,t-num(x.paid)))+'</b></div>')
  +'<div class="fg mt"><label>'+tr('Note')+'</label><input class="inp" id="iNote" value="'+esc(x.note||'')+'"></div></div>';
  const save='<div class="sv"><button class="btn" data-a="saveinv">'+tr('Save {0}',tr(I.n))+'</button></div>';
  const title=tr(S.invEdit?'Edit {0}':'New {0}',tr(I.n));
@@ -1220,8 +1223,8 @@ function pickHTML(){
 }
 ACT.pick=d=>{
  const p=db.products.find(z=>z.id===d.id);if(!p)return;
- const it=S.inv.items.find(i=>i.pid===p.id),buy=!isSaleT(S.inv.type);
- if(it)it.qty=num(it.qty)+1;else S.inv.items.push({pid:p.id,name:p.name,qty:1,price:buy?num(p.buy):num(p.sell),cost:num(p.buy)});
+ const it=S.inv.items.find(i=>i.pid===p.id),buy=!isSaleT(S.inv.type),free=S.inv.type==='sale_free';
+ if(it)it.qty=num(it.qty)+1;else S.inv.items.push({pid:p.id,name:p.name,qty:1,price:free?0:(buy?num(p.buy):num(p.sell)),cost:num(p.buy)});
  const pl=$('#pl');if(pl)pl.innerHTML=pickHTML();refreshItems();
 };
 ACT.qadj=d=>{
@@ -1357,6 +1360,7 @@ ACT.saveinv=()=>{
  if(!x.items.length)return toast('Add at least one item with a quantity');
  x.total=totT();
  if(I.order){x.paid=0;if(!x.status)x.status='pending'}
+ else if(x.type==='sale_free'){x.paid=0;if(!x.party)return toast('Choose a customer to record who received the free item')}
  else{
   x.paid=num(x.paid);
   if(x.paid>x.total+0.004){x.paid=x.total;toast('Amount was more than the total, so it was set to the total')}
@@ -1374,7 +1378,7 @@ ACT.saveinv=()=>{
 /* ---------- invoice detail ---------- */
 function shareText(x){
  const I=INV[x.type];
- return storeName()+'\n'+tr(I.n)+' '+x.no+' · '+fd(x.date)+'\n'+(x.party?tr('Party: {0}',pname(x.party))+'\n':'')+x.items.map(i=>'• '+i.name+' — '+fmt(i.qty)+' × '+fmt(i.price)+' = '+fmt(i.qty*i.price)).join('\n')+'\n'+tr('Total')+': '+cur(x.total)+(I.order?'':'\n'+tr(I.paid)+': '+cur(x.paid)+'\n'+tr('Due')+': '+cur(x.total-x.paid))+'\n'+noteTxt(db.set.note);
+ return storeName()+'\n'+tr(I.n)+' '+x.no+' · '+fd(x.date)+'\n'+(x.party?tr('Party: {0}',pname(x.party))+'\n':'')+x.items.map(i=>'• '+i.name+' — '+fmt(i.qty)+' × '+fmt(i.price)+' = '+fmt(i.qty*i.price)).join('\n')+'\n'+tr('Total')+': '+cur(x.total)+(I.order||x.type==='sale_free'?'':'\n'+tr(I.paid)+': '+cur(x.paid)+'\n'+tr('Due')+': '+cur(x.total-x.paid))+'\n'+noteTxt(db.set.note);
 }
 /* ---------- invoice designs ---------- */
 const DESIGNS=[['classic','Classic'],['modern','Modern'],['formal','Formal (A4)'],['thermal80','Thermal 80 mm'],['thermal58','Thermal 58 mm'],['minimal','Minimal']];
@@ -1388,16 +1392,17 @@ function invData(x){
  return{I:I,sale:isSaleT(x.type),p:p,sub:x.items.reduce((s,i)=>s+num(i.qty)*num(i.price),0),due:num(x.total)-num(x.paid),store:storeName(),phone:meta.user.phone,addr:db.set.addr||'',logo:db.set.logo!==false,partyName:pname(x.party),partyPhone:p?(p.phone||''):'',partyAddr:p?(p.address||''):'',note:noteTxt(db.set.note)};
 }
 function invTotals(x,v){
- const I=v.I;
+ const I=v.I,free=x.type==='sale_free';
  return '<div class="sr"><span>'+tr('Subtotal')+'</span><b>'+cur(v.sub)+'</b></div>'+(num(x.disc)?'<div class="sr"><span>'+tr('Discount')+'</span><b>−'+cur(x.disc)+'</b></div>':'')
  +'<div class="sr big"><span>'+tr('Total')+'</span><b>'+cur(x.total)+'</b></div>'
  +(I.order?'<div class="sr"><span>'+tr('Status')+'</span><b class="'+(x.status==='done'?'g':'o')+'">'+tr(x.status==='done'?'Completed':'Pending')+'</b></div>'
+  :free?'<div class="sr"><span>'+tr('Given as free item')+'</span><b class="g">'+tr('Yes')+'</b></div>'
   :'<div class="sr"><span>'+tr(I.paid)+'</span><b class="g">'+cur(x.paid)+'</b></div><div class="sr"><span>'+tr('Due')+'</span><b class="'+(v.due>0.004?'r':'')+'">'+cur(v.due)+'</b></div>');
 }
 function invHTML(x,d){
- const v=invData(x),I=v.I;
- const stc=I.order?(x.status==='done'?'g':'o'):(v.due>0.004?'r':'g');
- const st=I.order?tr(x.status==='done'?'Completed':'Pending'):(v.due>0.004?tr('Due {0}',cur(v.due)):tr('Paid'));
+ const v=invData(x),I=v.I,free=x.type==='sale_free';
+ const stc=I.order?(x.status==='done'?'g':'o'):free?'g':(v.due>0.004?'r':'g');
+ const st=I.order?tr(x.status==='done'?'Completed':'Pending'):free?tr('Free'):(v.due>0.004?tr('Due {0}',cur(v.due)):tr('Paid'));
  const logo=cls=>v.logo?'<img'+(cls?' class="'+cls+'"':'')+' src="'+LOGO+'" alt="">':'';
  const addr=v.addr?'<br>'+esc(v.addr):'';
  const cl=tr(v.sale?'Customer':'Supplier');
@@ -1425,7 +1430,7 @@ function invHTML(x,d){
    +ln(tr(I.n)+' '+x.no,fd(x.date))+ln(cl,esc(v.partyName))+'<hr>'
    +x.items.map(i=>'<div>'+esc(i.name)+'</div>'+ln(fmt(i.qty)+' x '+fmt(i.price),line(i))).join('')+'<hr>'
    +ln(tr('Subtotal'),cur(v.sub))+(num(x.disc)?ln(tr('Discount'),'−'+cur(x.disc)):'')+ln(tr('Total'),cur(x.total),1)
-   +(I.order?ln(tr('Status'),st):ln(tr(I.paid),cur(x.paid))+ln(tr('Due'),cur(v.due),1))
+   +(I.order?ln(tr('Status'),st):free?ln(tr('Given as free item'),tr('Yes')):ln(tr(I.paid),cur(x.paid))+ln(tr('Due'),cur(v.due),1))
    +(x.note?'<hr><div>'+esc(x.note)+'</div>':'')+'<hr><div class="c">'+esc(v.note)+'</div></div>';
   case 'minimal':
    return '<div class="iv mn pa"><div class="mtop"><div>'+logo()+'<b>'+esc(v.store)+'</b><br><small>'+esc(v.phone)+addr+'</small></div><div class="rt"><big>'+doc+'</big><small>'+x.no+' · '+fd(x.date)+'</small></div></div>'
@@ -1492,7 +1497,7 @@ VIEWS.due=()=>{
 ACT.dt=d=>{S.dt=d.p;render()};
 
 /* ---------- reports ---------- */
-const REPS=[['pl','Profit & Loss','Sales, cost and net profit','report'],['bs','Balance Sheet','Assets, liabilities and equity on a date','report'],['sales','Sales Report','Every sale in the period','sales'],['purchase','Purchase Report','Every purchase in the period','purchase'],['expense','Expense Report','Expenses by category','expense'],['stock','Stock Report','Quantity and value of stock','product'],['due','Due Report','Who owes what','due'],['daybook','Day Book','Money in and out','cash']];
+const REPS=[['pl','Profit & Loss','Sales, cost and net profit','report'],['bs','Balance Sheet','Assets, liabilities and equity on a date','report'],['sales','Sales Report','Every sale in the period','sales'],['purchase','Purchase Report','Every purchase in the period','purchase'],['expense','Expense Report','Expenses by category','expense'],['freeitems','Free Items Report','Free items given to customers','gift'],['stock','Stock Report','Quantity and value of stock','product'],['due','Due Report','Who owes what','due'],['daybook','Day Book','Money in and out','cash']];
 VIEWS.reports=()=>({t:tr('Reports'),h:REPS.map(r=>'<div class="row rep" data-a="go" data-r="report" data-p="'+r[0]+'">'+ic(r[3],30)+'<div class="rm"><b>'+tr(r[1])+'</b><small>'+tr(r[2])+'</small></div>'+ic('right',20,'#8a89a0')+'</div>').join('')});
 const repRange=()=>S.rp==='custom'?[S.rf||today(),S.rt||today()]:rng(S.rp);
 function repBody(r){
@@ -1516,7 +1521,7 @@ function repBody(r){
    +tt(tr('Liabilities + Equity'),liab+equity)+'</div></div>'
    +'<p class="mut">'+tr('Simple balance sheet from your records. Stock is valued at the current purchase price. “Capital & other adjustments” is the balancing figure (opening balances, cash adjustments, etc.).')+'</p>';
  }
- if(r==='pl')return per+row('Sales',m.sale)+row('Sales returns',-m.sret)+row('Net sales',m.net,'',1)+row('Cost of goods sold',m.cogs)+row('Gross profit',m.gp,m.gp>=0?'g':'r',1)+row('Expenses',m.exp)+row('Net profit',m.np,m.np>=0?'g':'r',1)+'<p class="mut">'+tr('For reference — purchases: {0}',cur(m.pur-m.pret))+'</p>';
+ if(r==='pl')return per+row('Sales',m.sale)+row('Sales returns',-m.sret)+row('Net sales',m.net,'',1)+row('Cost of goods sold',m.cogs)+row('Gross profit',m.gp,m.gp>=0?'g':'r',1)+row('Expenses',m.exp)+row('Free items given (cost value)',m.free)+row('Net profit',m.np,m.np>=0?'g':'r',1)+'<p class="mut">'+tr('For reference — purchases: {0}',cur(m.pur-m.pret))+'</p>';
  if(r==='sales'||r==='purchase'){
   const a=db.tx.filter(x=>x.type===(r==='sales'?'sale':'purchase')&&inR(x)).sort((x,y)=>x.date.localeCompare(y.date));
   const T=a.reduce((s,x)=>s+x.total,0),D=a.reduce((s,x)=>s+x.total-x.paid,0);
@@ -1538,6 +1543,12 @@ function repBody(r){
   const rows=db.parties.filter(p=>Math.abs(c.party[p.id])>0.004).sort((x,y)=>c.party[y.id]-c.party[x.id]).map(p=>'<tr><td>'+esc(p.name)+'</td><td class="n g">'+(c.party[p.id]>0?fmt(c.party[p.id]):'')+'</td><td class="n r">'+(c.party[p.id]<0?fmt(-c.party[p.id]):'')+'</td></tr>').join('');
   return '<div class="tw"><table class="tb"><thead><tr>'+th('Party')+th('To Receive',1)+th('To Pay',1)+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
  }
+ if(r==='freeitems'){
+  const a=db.tx.filter(x=>x.type==='sale_free'&&inR(x)).sort((x,y)=>x.date.localeCompare(y.date));
+  const T=a.reduce((s,x)=>s+cost(x),0);
+  const itemsTxt=x=>x.items.map(i=>i.name+' × '+fmt(i.qty)).join(', ');
+  return per+'<div class="tw"><table class="tb"><thead><tr>'+th('Date')+th('Customer')+th('Items')+th('Value',1)+'</tr></thead><tbody>'+a.map(x=>'<tr><td>'+fd(x.date)+'</td><td>'+esc(pname(x.party))+'</td><td>'+esc(itemsTxt(x))+'</td><td class="n">'+fmt(cost(x))+'</td></tr>').join('')+'</tbody><tfoot><tr><td colspan="3">'+tr('Total ({0})',fmt(a.length))+'</td><td class="n">'+fmt(T)+'</td></tr></tfoot></table></div>';
+ }
  if(r==='daybook'){
   let i=0,o=0;
   const rows=db.tx.filter(x=>inR(x)&&x.type!=='bank_tx'&&flowsOf(x).length).sort((x,y)=>x.date.localeCompare(y.date)||(x.ts||0)-(y.ts||0)).map(x=>{
@@ -1552,7 +1563,7 @@ function repBody(r){
 }
 VIEWS.report=p=>{
  const r=p.p||'pl',meta2=REPS.find(z=>z[0]===r);
- const needs=['pl','sales','purchase','expense','daybook'].indexOf(r)>=0;
+ const needs=['pl','sales','purchase','expense','freeitems','daybook'].indexOf(r)>=0;
  const chips=needs?'<div class="chips">'+Object.keys(PL).map(k=>'<button class="chip'+(S.rp===k?' on':'')+'" data-a="rp" data-p="'+k+'">'+tr(PL[k])+'</button>').join('')+'</div><div class="two" style="margin-bottom:12px"><div><label class="mut">'+tr('From')+'</label><input class="inp" type="date" id="rf" value="'+repRange()[0]+'"></div><div><label class="mut">'+tr('To')+'</label><input class="inp" type="date" id="rt" value="'+repRange()[1]+'"></div></div>':'';
  const title=meta2?tr(meta2[1]):tr('Report');
  const bsc=r==='bs'?'<div class="fg"><label class="mut">'+tr('As on')+'</label><input class="inp" type="date" id="bsd" value="'+(S.bsd||today())+'"></div>':'';
@@ -1855,11 +1866,15 @@ const supaRegister=(phone,pw,name,store,storesObj)=>supaRpc('bdc_register',{p_ph
 const supaLogin=(phone,pw)=>supaRpc('bdc_login',{p_phone:phone,p_password:pw}).then(j=>j&&j[0]);
 const supaPush=(phone,pw,storesObj)=>supaRpc('bdc_push',{p_phone:phone,p_password:pw,p_data:{stores:storesObj}}).then(j=>j&&j[0]);
 const supaPull=(phone,pw)=>supaRpc('bdc_pull',{p_phone:phone,p_password:pw}).then(j=>j&&j[0]);
-/* returns {storeId:{name,db}} from an account payload; falls back to the old single-store shape (v1.7) so existing cloud accounts keep working, mapping the legacy blob onto fallbackId */
+/* returns {storeId:{name,db}} from an account payload; falls back to the old single-store shape (v1.7) so a login on a brand-new device (no local stores yet, so no ambiguity) still recovers that account's data */
 function remoteStoresOf(acc,fallbackId){
  if(acc&&acc.data&&acc.data.stores)return acc.data.stores;
  if(acc&&acc.data&&acc.data.db){const o={};o[fallbackId||uid()]={name:(acc.store_name||'Store'),db:acc.data.db};return o}
  return {};
+}
+/* same, but NEVER guesses which local store an old-format blob belongs to — used whenever this device already has local stores, so we don't risk attaching someone else's/a different store's legacy data to whichever store happens to be open right now */
+function remoteStoresStrict(acc){
+ return (acc&&acc.data&&acc.data.stores)||{};
 }
 function allStoresPayload(){
  const o={};
@@ -1916,14 +1931,16 @@ async function cloudSyncNow(manual){
  syncing=true;setSync('busy');
  try{
   const rem=await supaPull(c.phone,c.pw);
-  const remStores=remoteStoresOf(rem,st.id);
+  const hasNewSchema=!!(rem&&rem.data&&rem.data.stores);
+  const remStores=hasNewSchema?rem.data.stores:{};
   const remEntry=remStores[st.id];
   const remDb=remEntry&&remEntry.db;
   const merged=remDb?mergeDB(db,remDb):db;
   const changedLocal=merged!==db&&canon(merged)!==canon(db);
   if(changedLocal)applyDB(merged);
   if(!remDb||canon(db)!==canon(remDb)){
-   const out=Object.assign({},remStores);
+   /* first sync after this update, or an old-format account: seed the cloud with every store this device already knows about, instead of guessing which store an old single-blob belonged to */
+   const out=hasNewSchema?Object.assign({},remStores):allStoresPayload();
    out[st.id]={name:st.name,db:db};
    await supaPush(c.phone,c.pw,out);
   }
@@ -1966,7 +1983,7 @@ ACT.clcon=async()=>{
   }catch(e){
    if(e.code==='taken'){
     const acc=await supaLogin(meta.user.phone,pw);
-    const remote=remoteStoresOf(acc,meta.cur);
+    const remote=remoteStoresStrict(acc);
     const out=Object.assign({},remote);
     Object.keys(mine).forEach(id=>{out[id]=remote[id]?{name:mine[id].name,db:mergeDB(mine[id].db,remote[id].db)}:mine[id]});
     Object.keys(out).forEach(id=>{
