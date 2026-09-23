@@ -402,7 +402,10 @@ const BN={
 'No account found with this phone number and password.':'এই ফোন নম্বর ও পাসওয়ার্ড দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি।','This phone number is already used by a cloud account. Use the correct password, or choose a different phone number.':'এই ফোন নম্বর দিয়ে আগে থেকে একটি ক্লাউড অ্যাকাউন্ট আছে। সঠিক পাসওয়ার্ড দিন, অথবা অন্য ফোন নম্বর ব্যবহার করুন।',
 'Logged in':'লগইন হয়েছে','Cloud Login (phone & password)':'ক্লাউড লগইন (ফোন ও পাসওয়ার্ড)','Log in on any device with just your phone number and password — no codes to copy.':'কোনো কোড কপি করা ছাড়াই শুধু ফোন নম্বর ও পাসওয়ার্ড দিয়ে যেকোনো ডিভাইসে লগইন করুন।',
 'Turn on cloud login':'ক্লাউড লগইন চালু করুন','Confirm your password to turn this on':'চালু করতে আপনার পাসওয়ার্ড নিশ্চিত করুন','Turn on':'চালু করুন','Cloud login is on for this phone number':'এই ফোন নম্বরের জন্য ক্লাউড লগইন চালু আছে',
-'Turn off cloud login':'ক্লাউড লগইন বন্ধ করুন','Refresh':'রিফ্রেশ',
+'Turn off cloud login':'ক্লাউড লগইন বন্ধ করুন','Refresh':'রিফ্রেশ','Dashboard':'ড্যাশবোর্ড',
+'Enter Edit PIN':'এডিট পিন দিন','This action needs the Edit PIN set by the owner.':'এই কাজের জন্য মালিকের সেট করা এডিট পিন লাগবে।','Confirm':'নিশ্চিত করুন','Wrong PIN':'পিন ভুল',
+'Edit Protection':'এডিট সুরক্ষা','Require a separate PIN before anyone can edit or delete a saved record, product, party, or category. Adding new entries is never blocked.':'সেভ করা রেকর্ড, পণ্য, পার্টি বা ক্যাটাগরি এডিট/মুছতে আলাদা একটা পিন লাগবে। নতুন কিছু যোগ করতে কখনোই পিন লাগবে না।',
+'New PIN (4+ digits)':'নতুন পিন (কমপক্ষে ৪ সংখ্যা)','Confirm PIN':'পিন আবার দিন','Edit Protection is on':'এডিট সুরক্ষা চালু আছে','Current PIN':'বর্তমান পিন','New PIN (leave blank to just turn off)':'নতুন পিন (শুধু বন্ধ করতে চাইলে খালি রাখুন)','Turn off':'বন্ধ করুন','Save new PIN':'নতুন পিন সংরক্ষণ করুন','PIN needs at least 4 digits':'পিনে কমপক্ষে ৪টি সংখ্যা লাগবে','PINs do not match':'দুটো পিন মিলছে না','Turned off':'বন্ধ হয়েছে',
 'Scan barcode':'বারকোড স্ক্যান করুন','Point the camera at the barcode':'বারকোডের দিকে ক্যামেরা ধরুন','Camera not available. Make sure you allowed camera access.':'ক্যামেরা পাওয়া যাচ্ছে না। ক্যামেরা অ্যাক্সেসের অনুমতি দিয়েছেন কিনা দেখুন।','This browser cannot scan barcodes. Please update Chrome, or type the barcode / use a barcode scanner device.':'এই ব্রাউজারে বারকোড স্ক্যান করা যাচ্ছে না। Chrome আপডেট করুন, অথবা বারকোড টাইপ করুন বা বারকোড স্ক্যানার যন্ত্র ব্যবহার করুন।','No product found for this barcode':'এই বারকোডের কোনো পণ্য পাওয়া যায়নি',
 'Point the camera at each barcode — it keeps scanning one after another':'একটার পর একটা বারকোডের দিকে ক্যামেরা ধরুন — একটানা স্ক্যান হতে থাকবে','Scanned: {0}':'স্ক্যান হয়েছে: {0}','Added':'যোগ হয়েছে','Turn off cloud login? Your data on this phone stays; other devices will stop syncing.':'ক্লাউড লগইন বন্ধ করবেন? এই ফোনের ডেটা থাকবে, অন্য ডিভাইসের সিঙ্ক বন্ধ হয়ে যাবে।',
 'EN':'EN','বাংলা':'বাংলা',
@@ -599,6 +602,7 @@ const P={
  invoice:'<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/>',
  cloud:'<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
  camera:'<path d="M4 8h3l1.6-2.4A2 2 0 0 1 10.3 4.6h3.4a2 2 0 0 1 1.7 1L17 8h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><circle cx="12" cy="14" r="4"/>',
+ home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4h4v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/>',
  refresh:'<path d="M4 4v6h6"/><path d="M20 20v-6h-6"/><path d="M5.5 9a7.5 7.5 0 0 1 12.6-3.2L20 8"/><path d="M18.5 15a7.5 7.5 0 0 1-12.6 3.2L4 16"/>'
 };
 const ic=(n,s=24,st='url(#hg)')=>'<svg class="ic" width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+st+'" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(P[n]||'')+'</svg>';
@@ -744,6 +748,7 @@ const langBtn=()=>'<button class="lgb" data-a="lang" aria-label="Language">'+(LA
 
 /* ---------- menu / drawer ---------- */
 const MENU=[
+ {i:'home',t:'Dashboard',a:'gohome'},
  {g:'sales',i:'sales',t:'Sales',c:[['Sales','sale',1],['Sales Return','sale_return',1],['Payment In','pay_in',1]]},
  {g:'purchase',i:'purchase',t:'Purchase',c:[['Purchase','purchase',1],['Purchase Return','purchase_return',1],['Payment Out','pay_out',1]]},
  {i:'invoice',t:'Invoices',r:'invoices',k:'invoices',add:1},
@@ -849,14 +854,63 @@ ACT.login=()=>{
  meta.auth=true;saveMeta();S.route='home';S.stack=[];db=null;render();schedSync(800);
 };
 ACT.logout=()=>{closeDrawer();meta.auth=false;saveMeta();S.route='home';S.stack=[];render()};
+ACT.gohome=()=>{closeDrawer();S.route='home';S.stack=[];render()};
 ACT.lang=()=>setLang(LANG==='bn'?'en':'bn');
 
 /* ---------- basic actions ---------- */
 ACT.drawer=()=>{$('#dr').classList.toggle('on');$('#dov').classList.toggle('on')};
 ACT.closesheet=closeSheet;
 ACT.yes=()=>{const f=S.cb;S.cb=null;closeSheet();if(f)f()};
+/* ---------- edit lock (PIN required to edit/delete existing records) ---------- */
+function needPin(){return !!(meta.editLock&&meta.editLock.ph)}
+function askPin(cb){
+ if(!needPin()){cb();return}
+ S.cb=cb;
+ sheet('<h3>'+tr('Enter Edit PIN')+'</h3><p class="mut" style="margin-top:0">'+tr('This action needs the Edit PIN set by the owner.')+'</p><div class="fg"><input class="inp" id="pinIn" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off"></div><div class="two mt"><button class="btn sec" data-a="closesheet">'+tr('Cancel')+'</button><button class="btn" data-a="pinok" style="margin:0">'+tr('Confirm')+'</button></div>');
+ setTimeout(()=>{const e=$('#pinIn');if(e)e.focus()},50);
+}
+ACT.pinok=()=>{
+ const v=($('#pinIn')&&$('#pinIn').value)||'';
+ if(!meta.editLock||hashPw(v,meta.editLock.salt)!==meta.editLock.ph){toast('Wrong PIN');const e=$('#pinIn');if(e){e.value='';e.focus()}return}
+ const f=S.cb;S.cb=null;closeSheet();if(f)f();
+};
+function editLockCard(){
+ const on=needPin();
+ let h='<div class="card mt"><b>'+tr('Edit Protection')+'</b><p class="mut">'+tr('Require a separate PIN before anyone can edit or delete a saved record, product, party, or category. Adding new entries is never blocked.')+'</p>';
+ if(!on){
+  h+='<div class="fg"><label>'+tr('New PIN (4+ digits)')+'</label><input class="inp" id="elNew" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></div>'
+   +'<div class="fg"><label>'+tr('Confirm PIN')+'</label><input class="inp" id="elNew2" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></div>'
+   +'<button class="btn" data-a="elon">'+tr('Turn on')+'</button>';
+ }else{
+  h+='<p class="mut" style="font-weight:600">'+tr('Edit Protection is on')+'</p>'
+   +'<div class="fg"><label>'+tr('Current PIN')+'</label><input class="inp" id="elOld" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></div>'
+   +'<div class="fg"><label>'+tr('New PIN (leave blank to just turn off)')+'</label><input class="inp" id="elNew3" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></div>'
+   +'<div class="two mt"><button class="btn sec" data-a="eloff">'+tr('Turn off')+'</button><button class="btn" data-a="elchg" style="margin:0">'+tr('Save new PIN')+'</button></div>';
+ }
+ return h+'</div>';
+}
+ACT.elon=()=>{
+ const a=$('#elNew').value,b=$('#elNew2').value;
+ if(a.length<4)return toast('PIN needs at least 4 digits');
+ if(a!==b)return toast('PINs do not match');
+ const salt=Math.random().toString(36).slice(2)+Date.now().toString(36);
+ meta.editLock={salt:salt,ph:hashPw(a,salt)};saveMeta();render();toast('Edit Protection is on');
+};
+ACT.eloff=()=>{
+ const old=$('#elOld').value;
+ if(!meta.editLock||hashPw(old,meta.editLock.salt)!==meta.editLock.ph)return toast('Wrong PIN');
+ meta.editLock=null;saveMeta();render();toast('Turned off');
+};
+ACT.elchg=()=>{
+ const old=$('#elOld').value,nw=$('#elNew3').value;
+ if(!meta.editLock||hashPw(old,meta.editLock.salt)!==meta.editLock.ph)return toast('Wrong PIN');
+ if(!nw){meta.editLock=null;saveMeta();render();toast('Turned off');return}
+ if(nw.length<4)return toast('PIN needs at least 4 digits');
+ const salt=Math.random().toString(36).slice(2)+Date.now().toString(36);
+ meta.editLock={salt:salt,ph:hashPw(nw,salt)};saveMeta();render();toast('Saved');
+};
 ACT.back=back;
-ACT.go=d=>{const p=Object.assign({},d);if(d.r==='due'&&d.t)S.dt=d.t;go(d.r,p)};
+ACT.go=d=>{const p=Object.assign({},d);if(d.r==='due'&&d.t)S.dt=d.t;if(d.r==='form'&&d.id&&needPin()){askPin(()=>go(d.r,p));return}go(d.r,p)};
 ACT.nav=d=>nav(d.r,{k:d.k});
 ACT.grp=d=>{S.open[d.g]=!S.open[d.g];renderDrawer()};
 ACT.hide=()=>{S.hide=!S.hide;render()};
@@ -1076,10 +1130,10 @@ function inUse(k,id){
 ACT.delform=d=>{
  const fm=FORMS[d.k];
  if(!fm.tx&&inUse(d.k,d.id))return toast('This is used in transactions, so it can’t be deleted');
- ask('Delete this record?',()=>{
+ askPin(()=>ask('Delete this record?',()=>{
   if(fm.tx)db.tx=db.tx.filter(z=>z.id!==d.id);else db[fm.coll]=db[fm.coll].filter(z=>z.id!==d.id);
   saveDB();toast('Deleted');back();
- });
+ }));
 };
 
 /* ---------- party ledger ---------- */
@@ -1418,8 +1472,8 @@ ACT.share=d=>{
  const x=db.tx.find(z=>z.id===d.id),t=shareText(x);
  if(navigator.share){navigator.share({text:t}).catch(()=>{})}else copyText(t);
 };
-ACT.editinv=d=>{const x=db.tx.find(z=>z.id===d.id);startInv(x.type,x,x.id);go('inv',{})};
-ACT.delinv=d=>ask('Delete this invoice?',()=>{db.tx=db.tx.filter(z=>z.id!==d.id);saveDB();toast('Deleted');back()});
+ACT.editinv=d=>askPin(()=>{const x=db.tx.find(z=>z.id===d.id);startInv(x.type,x,x.id);go('inv',{})});
+ACT.delinv=d=>askPin(()=>ask('Delete this invoice?',()=>{db.tx=db.tx.filter(z=>z.id!==d.id);saveDB();toast('Deleted');back()}));
 ACT.convert=d=>{
  const o=db.tx.find(z=>z.id===d.id),nk=isSaleT(o.type)?'sale':'purchase';
  const b={date:today(),party:o.party,items:o.items,disc:o.disc,paid:0,mode:'cash',note:o.note};
@@ -1582,7 +1636,7 @@ VIEWS.settings=()=>{
  +'<div class="two"><div class="fg"><label>'+tr('Language')+'</label><select class="inp" id="stLang">'+opt([['bn','বাংলা'],['en','English']],LANG)+'</select></div><div class="fg"><label>'+tr('Appearance')+'</label><select class="inp" id="stTheme">'+opt([['auto',tr('Match my phone')],['light',tr('Light')],['dark',tr('Dark')]],meta.theme)+'</select></div></div></div>'
  +'<div class="card mt"><b>'+tr('Invoice design')+'</b><p class="mut" style="margin:4px 0 0">'+tr('Pick the default design for invoices. You can also switch the design on any invoice.')+'</p>'+designGallery(db.set.inv||'classic')+'</div>'
  +'<div class="sv" style="position:static;padding-bottom:0"><button class="btn mt" data-a="savesettings">'+tr('Save settings')+'</button></div>'
- +cloudCard2()+cloudCard()+'<div class="card mt"><b>'+tr('Backup')+'</b><p class="mut">'+tr('Copy this text and keep it safe. To restore, paste it here and tap Restore. Restoring replaces this store’s data.')+'</p><textarea class="inp" id="bkT">'+esc(bk)+'</textarea><div class="two mt"><button class="btn sec" data-a="copybk">'+tr('Copy')+'</button><button class="btn sec" data-a="restore">'+tr('Restore')+'</button></div></div>';
+ +cloudCard2()+cloudCard()+editLockCard()+'<div class="card mt"><b>'+tr('Backup')+'</b><p class="mut">'+tr('Copy this text and keep it safe. To restore, paste it here and tap Restore. Restoring replaces this store’s data.')+'</p><textarea class="inp" id="bkT">'+esc(bk)+'</textarea><div class="two mt"><button class="btn sec" data-a="copybk">'+tr('Copy')+'</button><button class="btn sec" data-a="restore">'+tr('Restore')+'</button></div></div>';
  return{t:tr('Settings'),h:h};
 };
 ACT.savesettings=()=>{
