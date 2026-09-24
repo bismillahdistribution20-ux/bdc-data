@@ -3,6 +3,27 @@ BDC PRO v1.7.0 — Bismillah Distribution Center
 
 বাংলা
 -----
+নতুন: বড় স্টোরেজ ও ব্যাকআপ ফাইল
+- ডেটা এখন ব্রাউজারের IndexedDB-তে থাকে (আগে localStorage, সীমা প্রায় ৫MB)। পুরোনো ডেটা প্রথমবার খুললে নিজে থেকে সরে আসে, কিছু হারায় না।
+- সেটিংস -> ব্যাকআপ: "ব্যাকআপ ফাইল ডাউনলোড" ও "ফাইল থেকে রিস্টোর"। ডেটা বড় হলে শুধু ফাইল ব্যাকআপ দেখায়।
+- ৩০ দিনের বেশি ফাইল ব্যাকআপ না নিলে অ্যাপ মনে করিয়ে দেয়। ফাইলটি Google Drive বা পেনড্রাইভে রাখুন — ১০ বছরের রেকর্ডের আসল নিরাপত্তা এটাই।
+- ক্লাউড সিঙ্ক ফোনের জায়গা কমায় না; ফোনে পুরো ডেটাই থাকে।
+
+নতুন: পণ্য এন্ট্রিতে লাভ % ও হোলসেল দর, ক্লাসিক বাংলা ফন্ট
+- পণ্য যোগ/এডিটে ক্রয়মূল্য দিয়ে "লাভ %" লিখলে বিক্রয়মূল্য নিজে হিসাব হয়; বিক্রয়মূল্য লিখলে লাভ % বেরিয়ে আসে। হোলসেল লাভ % ও হোলসেল দরও একইভাবে। লাভ % হিসাব হয় ক্রয়মূল্যের উপর।
+- বিক্রি স্ক্রিনে "খুচরা দর / হোলসেল দর" বোতাম: হোলসেল বাছলে সব পণ্য হোলসেল দামে যোগ হয় (হাতে বদলানো দাম অপরিবর্তিত থাকে)। হোলসেল দর ফাঁকা থাকলে খুচরা দর ধরা হয়।
+- পণ্যসমূহ তালিকায় হোলসেল দর দেখায়।
+- ফন্ট: Noto Serif Bengali (ক্লাসিক)। প্রথমবার ইন্টারনেটে খুললে ফন্ট সেভ হয়ে অফলাইনেও থাকে।
+
+নতুন: ফুল অফলাইন মোড
+- ইন্টারনেট ছাড়াই অ্যাপ খোলে এবং বিক্রি, ক্রয়, খরচ, পার্টি, রিপোর্ট সবকিছু চলে। সব ডেটা ফোন/কম্পিউটারেই সেভ হয়।
+- ইন্টারনেট ফিরলে নিজে থেকেই ক্লাউডে সিঙ্ক হয় (ক্লাউড লগইন বা GitHub সিঙ্ক চালু থাকলে)। সংযোগ মাঝপথে কেটে গেলে অ্যাপ নিজেই আবার চেষ্টা করে।
+- একবার অন্তত ইন্টারনেটে https লিংকে (যেমন GitHub Pages) অ্যাপ খুলুন। "অফলাইনে চালানোর জন্য প্রস্তুত" লেখা দেখালে বুঝবেন অফলাইন চালু হয়েছে।
+- GitHub-এ আপলোডের সময় sw.js ফাইলটিও দিতে হবে (শুধু index.html দিলে অফলাইন কাজ করবে না)।
+- নেট দুর্বল বা "কানেক্টেড কিন্তু ইন্টারনেট নেই" থাকলে অ্যাপ ৪ সেকেন্ডের বেশি অপেক্ষা করে না, সেভ করা কপি খুলে দেয়।
+- ডিভাইসের জায়গা প্রায় শেষ হলে বা ডেটা সেভ করা না গেলে সতর্কবার্তা আসে — তখনই সেটিংস -> ব্যাকআপ থেকে কপি করে রাখুন।
+- Windows-এ Start-BDC-PRO.bat দিয়ে চালালে সবসময় অফলাইনে চলে।
+
 ফোনে চালাতে
 1. zip আনজিপ করুন, "index.html" Chrome-এ খুলুন।
 2. প্রথমবার নাম, ফোন, দোকানের নাম ও পাসওয়ার্ড দিয়ে অ্যাকাউন্ট খুলুন।
@@ -76,6 +97,27 @@ GitHub Pages-এ রাখলে আইকন কীভাবে আসবে
 
 English
 -------
+New: big storage and backup file
+- Data now lives in the browser's IndexedDB (was localStorage, ~5 MB limit). Existing data moves over by itself the first time you open this version; nothing is lost.
+- Settings -> Backup: "Download backup file" and "Restore from file". When the data is large only the file backup is shown.
+- The app reminds you if no backup file was taken for 30 days. Keep the file on Google Drive or a pen drive - that is the real 10-year safety.
+- Cloud sync does not reduce phone storage use; the phone still keeps all the data.
+
+New: profit % and wholesale price on product entry, classic Bangla font
+- On a product, type a purchase price and a "Profit %" and the sale price is calculated; type the sale price and the profit % is shown. Same for wholesale profit % and wholesale price. Profit % is on the purchase price.
+- New sale screen has Retail / Wholesale price buttons: choose Wholesale and items are added at the wholesale price (prices you typed by hand are left alone). If a product has no wholesale price, the retail price is used.
+- The product list shows the wholesale price.
+- Font: Noto Serif Bengali (classic). It is saved on the first online visit and then works offline.
+
+New: full offline mode
+- The app opens with no internet, and sales, purchases, expenses, parties and reports all work. Everything is saved on the device.
+- When the internet returns it syncs to the cloud by itself (if Cloud Login or GitHub sync is on). If the connection drops mid-sync the app retries on its own.
+- Open the app once online over https (e.g. GitHub Pages). When you see "Ready for offline use", offline mode is active.
+- When uploading to GitHub, include sw.js too (index.html alone will not work offline).
+- On a weak or "connected but no internet" link the app waits at most ~4 seconds, then opens the saved copy.
+- A warning appears when device storage is almost full or cannot be written — take a backup (Settings -> Backup) right away.
+- On Windows, Start-BDC-PRO.bat always runs fully offline.
+
 Run on a phone
 1. Unzip and open "index.html" in Chrome.
 2. Create your account on first launch.
